@@ -1,0 +1,14 @@
+Name: user
+Host: 0.0.0.0
+Port: 8888
+
+UserRpc:
+  Etcd:
+    Hosts:
+      - 192.168.2.6:12379
+    Key: user.rpc
+
+JwtAuth:
+  AccessSecret: wsqigo.com
+  AccessExpire: 8640000 # 100天
+
