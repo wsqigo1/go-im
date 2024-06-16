@@ -109,8 +109,12 @@ func (m *defaultFriendRequestsModel) FindByReqUidAndUserId(ctx context.Context,
 }
 
 func (m *defaultFriendRequestsModel) ListNoHandler(ctx context.Context, userId string) ([]*FriendRequests, error) {
-	//TODO implement me
-	panic("implement me")
+	query := fmt.Sprintf("select %s from %s where `handle_result` = 1 and `user_id` = ?",
+		friendRequestsRows, m.table)
+
+	var resp []*FriendRequests
+	err := m.QueryRowsNoCacheCtx(ctx, &resp, query, userId)
+	return resp, err
 }
 
 func (m *defaultFriendRequestsModel) Insert(ctx context.Context, data *FriendRequests) (sql.Result, error) {
