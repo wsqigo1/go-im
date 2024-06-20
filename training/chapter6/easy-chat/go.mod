@@ -5,7 +5,9 @@ go 1.22.4
 require (
 	github.com/edwingeng/wuid v1.0.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
+	github.com/gorilla/websocket v1.5.0
 	github.com/jinzhu/copier v0.4.0
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
 	github.com/zeromicro/go-zero v1.6.5
