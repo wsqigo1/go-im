@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/edwingeng/wuid/mysql/wuid"
+	"sort"
+	"strconv"
 )
 
 var w *wuid.WUID
@@ -28,4 +30,14 @@ func GenUid(dsn string) string {
 	}
 	// 16位宽度的十六进制字符串，并在前面添加0x前缀，不足16位的部分使用零填充
 	return fmt.Sprintf("%#016x", w.Next())
+}
+
+func CombineId(aid, bid string) string {
+	ids := []string{aid, bid}
+	sort.Slice(ids, func(i, j int) bool {
+		num1, _ := strconv.ParseUint(ids[i], 10, 64)
+		num2, _ := strconv.ParseUint(ids[j], 10, 64)
+		return num1 < num2
+	})
+	return fmt.Sprintf("%s_%s", ids[0], ids[1])
 }

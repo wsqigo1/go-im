@@ -13,10 +13,22 @@ type Config struct {
 		AccessSecret string
 	}
 
-	Mongo MongoConfig
+	Mongo           MongoConfig
+	MsgChatTransfer MsgChatTransferConfig
+	MsgReadTransfer MsgReadTransferConfig
 }
 
 type MongoConfig struct {
 	Url string
 	Db  string
+}
+
+type MsgChatTransferConfig struct {
+	Topic string
+	Addrs []string
+}
+
+type MsgReadTransferConfig struct {
+	Topic string
+	Addrs []string
 }

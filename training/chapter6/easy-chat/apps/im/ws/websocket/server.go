@@ -117,19 +117,19 @@ func (s *Server) handlerConn(conn *Conn) {
 		}
 
 		// 依据消息进行处理
-		//if s.isAck(&message) {
-		//	s.Infof("conn message read ack msg %v", message)
-		//	conn.appendMsgMq(&message)
-		//} else {
-		//	conn.message <- &message
-		//}
-		// 根据请求的method分发路由并执行
-		if handler, ok := s.routes[message.Method]; ok {
-			handler(s, conn, &message)
+		if s.isAck(&message) {
+			s.Infof("conn message read ack msg %v", message)
+			conn.appendMsgMq(&message)
 		} else {
-			conn.WriteMessage(websocket.TextMessage,
-				[]byte(fmt.Sprintf("不存在执行的方法 %v 请检查", message.Method)))
+			conn.message <- &message
 		}
+		// 根据请求的method分发路由并执行
+		//if handler, ok := s.routes[message.Method]; ok {
+		//	handler(s, conn, &message)
+		//} else {
+		//	conn.WriteMessage(websocket.TextMessage,
+		//		[]byte(fmt.Sprintf("不存在执行的方法 %v 请检查", message.Method)))
+		//}
 	}
 }
 

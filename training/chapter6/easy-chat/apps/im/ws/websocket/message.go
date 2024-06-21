@@ -22,7 +22,7 @@ const (
 )
 
 type Message struct {
-	FrameType `json:"frameType"`
+	FrameType FrameType `json:"frameType"` // 请求的类型
 	Id        string    `json:"id"`
 	AckSeq    int       `json:"ackSeq"`
 	AckTime   time.Time `json:"ackTime"`

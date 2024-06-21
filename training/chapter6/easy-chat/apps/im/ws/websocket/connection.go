@@ -10,13 +10,13 @@ import (
 type Conn struct {
 	idleMu sync.Mutex
 
-	Uid string
+	Uid string // 连接的用户ID
 
 	*websocket.Conn
-	s *Server
+	s *Server // 可能会用到 Server 方法
 
-	idle              time.Time
-	maxConnectionIdle time.Duration
+	idle              time.Time     // 空闲的时间
+	maxConnectionIdle time.Duration // 最大空闲时间
 
 	messageMu      sync.Mutex
 	readMessage    []*Message
@@ -24,7 +24,7 @@ type Conn struct {
 
 	message chan *Message
 
-	done chan struct{}
+	done chan struct{} // 关闭的通道
 }
 
 func NewConn(s *Server, w http.ResponseWriter, r *http.Request) *Conn {
@@ -79,6 +79,33 @@ func (c *Conn) appendMsgMq(msg *Message) {
 	c.readMessageSeq[msg.Id] = msg
 }
 
+func (c *Conn) ReadMessage() (messageType int, p []byte, err error) {
+	messageType, p, err = c.Conn.ReadMessage()
+
+	c.idleMu.Lock()
+	defer c.idleMu.Unlock()
+	c.idle = time.Time{} // non-idle
+	return
+}
+
+func (c *Conn) WriteMessage(messageType int, data []byte) error {
+	c.idleMu.Lock()
+	defer c.idleMu.Unlock()
+	// conn的读写并不安全
+	err := c.Conn.WriteMessage(messageType, data)
+	c.idle = time.Now()
+	return err
+}
+
+func (c *Conn) Close() error {
+	select {
+	case <-c.done:
+	default:
+		close(c.done)
+	}
+	return c.Conn.Close()
+}
+
 func (c *Conn) keepalive() {
 	idleTimer := time.NewTimer(c.maxConnectionIdle)
 	defer func() {
@@ -91,16 +118,17 @@ func (c *Conn) keepalive() {
 			c.idleMu.Lock()
 			idle := c.idle
 			if idle.IsZero() {
+				// The connection is non-idle.
 				c.idleMu.Unlock()
 				idleTimer.Reset(c.maxConnectionIdle)
 				continue
 			}
-			val := c.maxConnectionIdle - time.Since(idle)
+			val := c.maxConnectionIdle - time.Since(c.idle)
 			c.idleMu.Unlock()
 			if val <= 0 {
 				// The connection has been idle for a duration of keepalive.MaxConnectionIdle or more.
 				// Gracefully close the connection.
-				//c.s.Close(c)
+				c.s.Close(c)
 				return
 			}
 			idleTimer.Reset(val)

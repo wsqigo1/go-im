@@ -1,0 +1,11 @@
+package immodels
+
+import (
+	"errors"
+	"github.com/zeromicro/go-zero/core/stores/mon"
+)
+
+var (
+	ErrNotFound          = mon.ErrNotFound
+	ErrInvalidObjectedId = errors.New("invalid objectId")
+)
